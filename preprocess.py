@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 import torch
 import torch.nn.functional as F
+import argparse
 
 def preprocess_yesno(root_path, output_path, sample_rate=8000):
     Path(output_path).mkdir(parents=True, exist_ok=True)
@@ -24,6 +25,12 @@ def preprocess_yesno(root_path, output_path, sample_rate=8000):
     audio_tensor = torch.stack(padded_audios)
     labels_tensor = torch.tensor(labels, dtype=torch.float32)
     combined_tensor = torch.cat([audio_tensor.view(audio_tensor.size(0), -1), labels_tensor], dim=1)
-    output_file = os.path.join(output_path, "yesno_combined_tensor.pt")
+    output_file = os.path.join(output_path, "yesno_tensor.pt")
     torch.save(combined_tensor, output_file)
-    
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--root_path", type=str, required=True, help="Ruta de los audios originales")
+    parser.add_argument("--output_path", type=str, required=True, help="Ruta para guardar el tensor combinado")
+    parser.add_argument("--sample_rate", type=int, default=8000, help="Frecuencia de muestreo deseada")
+    args = parser.parse_args()
+    preprocess_yesno(args.root_path, args.output_path, args.sample_rate)
